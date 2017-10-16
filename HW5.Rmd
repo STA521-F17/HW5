@@ -47,10 +47,8 @@ truemodel = betatrue != 0
 
 
 
-### Generate Data
-
-We are now going to generate an 100  X matrices with correlated columns
-```{r datasets, cache=TRUE} 
+Generate Data with correlated columns.
+```{r data, cache=TRUE} 
 
 #sample size
 n = 1000
@@ -88,80 +86,24 @@ df = data.frame(Y, X, mu)
 
 
 
-The  "true" parameters are
-```{r true}
-# true parameters
-sigma = 2.5
-betatrue = c(4,2,0,0,0,-1,0,1.5, 0,0,0,1,0,.5,0,0,0,0,-1,1,4)
-#          int|    X1                            | X2     |X3 
-
-truemodel = betatrue != 0
-```
-
-We are now going to generate an 100  X matrices with correlated columns for the training data.  
-```{r datasets, cache=TRUE} 
-set.seed(42)
-#sample size
-n = 50
-
-# part of dataframe name
-fname=rep("df",100)
-
-# create 100 datasets
-for (i in 1:100) {
-  
-# generate some satandard normals
-  Z = matrix(rnorm(n*10, 0, 1), ncol=10, nrow=n)
-  
-#  Create X1 by taking linear cominations of Z to induce correlation among X1 components
-  
-  X1 = cbind(Z, 
-             (Z[,1:5] %*% c(.3, .5, .7, .9, 1.1) %*% t(rep(1,5)) +
-             matrix(rnorm(n*5, 0, 1), ncol=5, nrow=n))
-             )
-# generate X2 as a standard normal  
-  X2 <- matrix(rnorm(n*4,0,1), ncol=4, nrow=n)
-  
-# Generate X3 as a linear combination of X2 and noise  
-  X3 <- X2[,4]+rnorm(n,0,sd=0.1)
-  
-# combine them  
-  X <- cbind(X1,X2,X3)
-  
-# subtract off the column means
-  X = sweep(X, 2, apply(X,2, mean), FUN="-") 
-#  also see scale()
-# Generate mu     
-# X does not have a column of ones for the intercept so need to add the intercept  
-# for true mu  
-  mu = betatrue[1] + X %*% betatrue[-1] 
-  
-# now generate Y  
-  Y = mu + rnorm(n,0,sigma)  
-  
-# make a dataframe and save it
-  df = data.frame(Y, X, mu)
-  fname[i] = paste("df", as.character(i), sep="")
-  save(df, file=fname[i])
-}
-```
 
 
 2. Split your data set into a training set containing $100$ observations and a test set containing $900$ observations.  Before splitting reset the random seed based on your team number
 ```{r}
-set.seed(0)
+set.seed(0)   # replace 0 with team number before runing
 ```
 
 
 
 
-3.  Using Ordinary Least squares based on fitting the full model for the training data,  compute the average RMSE for a) estimating $\beta^{true}$, b) estimating $\mu^{true} = X_{\text{test}} \beta^{true}$ and c) out of sample prediction of $Y$ for the test data.
+
+3.  Using Ordinary Least squares based on fitting the full model for the training data,  compute the average RMSE for a) estimating $\beta_{true}$, b) estimating $\mu_{true} = X_{\text{test}} \beta_{true}$ and c) out of sample prediction of $Y_{test}$ for the test data.
 Note for a vector of length $d$, RMSE is defined as
 $$
 RMSE(\hat{\theta}) = \sqrt{\sum_{i = 1}^{d} (\hat{\theta}_j - \theta_j)^2/d}
 $$
-Provide Confidence/prediction intervals for $\beta$, and $\mu$, and $Y$ in the test data and report what percent of the intervals contain the true values.
-_(Finish Tuesday)_
+Provide Confidence/prediction intervals for $\beta$, and $\mu$, and $Y$ in the test data and report what percent of the intervals contain the true values.  Do any estimates seem surprising?
+
 
 3. Perform best subset selection on the training data, and plot the training set RMSE for fitting associated with the best model of each size.
 
